@@ -41,7 +41,7 @@ export const CATEGORIES: Category[] = [
     tools: [
       { id: 'base-n', name: 'BaseNエンコード', description: 'Base64 / Base32 / Base58 / Base85 のエンコード／デコード' },
       { id: 'url-enc', name: 'URLエンコード', description: 'URLエンコード／デコード（%エンコード）', implemented: true },
-      { id: 'esc-json', name: 'エスケープ変換（JSON）', description: 'JSON文字列のエスケープ／アンエスケープ' },
+      { id: 'esc-json', name: 'エスケープ変換（JSON）', description: 'JSON文字列のエスケープ／アンエスケープ', implemented: true },
       { id: 'esc-js', name: 'エスケープ変換（JavaScript）', description: 'JS文字列のエスケープ／アンエスケープ' },
       { id: 'esc-html', name: 'エスケープ変換（HTML）', description: 'HTMLエスケープ／アンエスケープ' },
       { id: 'newline', name: '改行コード変換', description: 'LF / CRLF の相互変換' },
