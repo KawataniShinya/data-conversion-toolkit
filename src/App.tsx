@@ -4,6 +4,7 @@ import type { ToolCategory } from './data/tools'
 import Home from './components/Home'
 import BaseConverter from './tools/BaseConverter'
 import UrlEncoder from './tools/UrlEncoder'
+import JsonEscapeConverter from './tools/JsonEscapeConverter'
 import UnicodeConverter from './tools/UnicodeConverter'
 import TextHexConverter from './tools/TextHexConverter'
 import PlaceholderTool from './tools/PlaceholderTool'
@@ -13,6 +14,11 @@ import './App.css'
 function App() {
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'home'>('home')
   const [activeToolId, setActiveToolId] = useState<string | null>(null)
+
+  const navigateHome = () => {
+    setActiveCategory('home')
+    setActiveToolId(null)
+  }
 
   const handleSelectTool = (categoryId: ToolCategory, toolId: string) => {
     setActiveCategory(categoryId)
@@ -37,6 +43,8 @@ function App() {
         return <BaseConverter />
       case 'url-enc':
         return <UrlEncoder />
+      case 'esc-json':
+        return <JsonEscapeConverter />
       case 'unicode':
         return <UnicodeConverter />
       case 'text-hex':
@@ -50,17 +58,10 @@ function App() {
     <div className="app-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-header" onClick={() => { setActiveCategory('home'); setActiveToolId(null); }}>
-          Data Toolkit
+        <div className="sidebar-header" onClick={navigateHome}>
+          Data Conversion Toolkit
         </div>
         <div className="category-list">
-          <div 
-            className={`category-item ${activeCategory === 'home' ? 'active' : ''}`}
-            onClick={() => { setActiveCategory('home'); setActiveToolId(null); }}
-          >
-            <Icons.Home size={20} className="icon" />
-            <span>トップページ</span>
-          </div>
           {CATEGORIES.map((cat) => (
             <div 
               key={cat.id} 
