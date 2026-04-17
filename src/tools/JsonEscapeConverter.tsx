@@ -9,7 +9,47 @@ const MODE_LABELS: Record<Mode, string> = {
 
 const EXAMPLES: Record<Mode, string> = {
   escape: '例: {"name":"John","age":0}',
-  unescape: '例: {\\"name\\":\\"John\\",\\"age\\":0}',
+  unescape: '例: {"target":"readers","updated":"{\\"asp_member_id\\":55561}"}',
+}
+
+const tryParseNestedJson = (value: string): unknown => {
+  const trimmed = value.trim()
+
+  if (trimmed === '') {
+    return value
+  }
+
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    try {
+      const normalized = trimmed.startsWith('"') && trimmed.endsWith('"')
+        ? trimmed
+        : `"${value}"`
+      return JSON.parse(normalized)
+    } catch {
+      return value
+    }
+  }
+}
+
+const expandNestedJson = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    const parsed = tryParseNestedJson(value)
+    return parsed === value ? value : expandNestedJson(parsed)
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => expandNestedJson(item))
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, expandNestedJson(entry)]),
+    )
+  }
+
+  return value
 }
 
 const JsonEscapeConverter: React.FC = () => {
@@ -29,17 +69,26 @@ const JsonEscapeConverter: React.FC = () => {
         }
       }
 
-      const normalized = input.trim().startsWith('"') && input.trim().endsWith('"')
-        ? input.trim()
-        : `"${input}"`
+      const trimmed = input.trim()
 
-      const parsed = JSON.parse(normalized)
+      try {
+        const parsed = expandNestedJson(JSON.parse(trimmed))
 
-      if (typeof parsed !== 'string') {
-        return { output: '', error: 'Error: JSON string ではありません' }
+        return {
+          output: typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2),
+          error: '',
+        }
+      } catch {
+        const normalized = trimmed.startsWith('"') && trimmed.endsWith('"')
+          ? trimmed
+          : `"${input}"`
+        const parsed = expandNestedJson(JSON.parse(normalized))
+
+        return {
+          output: typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2),
+          error: '',
+        }
       }
-
-      return { output: parsed, error: '' }
     } catch {
       return { output: '', error: 'Error: 不正な JSON エスケープ文字列です' }
     }
@@ -56,7 +105,7 @@ const JsonEscapeConverter: React.FC = () => {
       <div className="tool-card">
         <p style={{ marginBottom: '1.5rem', color: '#64748b' }}>
           JSON 文字列で使うエスケープ表現と通常テキストを相互に変換します。
-          `\n` や `\"`、Unicode エスケープを確認したい場面を想定しています。
+          `\n` や `\"`、Unicode エスケープに加えて、JSON オブジェクトや配列の確認にも使えます。
         </p>
 
         <div className="json-escape-toolbar">
@@ -95,7 +144,8 @@ const JsonEscapeConverter: React.FC = () => {
         </div>
 
         <div className="tool-note">
-          アンエスケープ時は `\"hello\"` のような JSON 文字列本体か、`"hello"` のような引用符付き JSON 文字列のどちらでも扱えます。
+          アンエスケープ時は `\"hello\"` のような JSON 文字列本体、`"hello"` のような引用符付き JSON 文字列、
+          あるいは JSON オブジェクトや配列そのものも扱えます。ネストした JSON 文字列も再帰的に展開します。
         </div>
       </div>
     </div>

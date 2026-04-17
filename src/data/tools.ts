@@ -62,6 +62,7 @@ export const CATEGORIES: Category[] = [
     name: 'フォーマット変換',
     icon: 'FileCode',
     tools: [
+      { id: 'csv-view', name: 'CSVビューア', description: 'CSVを行・列に分解して表示し、セル編集からCSVへ反映', implemented: true },
       { id: 'json-pretty', name: 'JSON整形', description: 'Pretty Print／圧縮' },
       { id: 'json-yaml-xml', name: 'JSON ⇄ YAML ⇄ XML', description: '各フォーマット間の相互変換' },
       { id: 'url-json', name: 'URLクエリ ⇄ JSON', description: 'クエリ文字列とJSONの相互変換' },

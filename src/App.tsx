@@ -7,6 +7,7 @@ import UrlEncoder from './tools/UrlEncoder'
 import JsonEscapeConverter from './tools/JsonEscapeConverter'
 import UnicodeConverter from './tools/UnicodeConverter'
 import TextHexConverter from './tools/TextHexConverter'
+import CsvViewer from './tools/CsvViewer'
 import PlaceholderTool from './tools/PlaceholderTool'
 import * as Icons from 'lucide-react'
 import './App.css'
@@ -49,6 +50,8 @@ function App() {
         return <UnicodeConverter />
       case 'text-hex':
         return <TextHexConverter />
+      case 'csv-view':
+        return <CsvViewer />
       default:
         return <PlaceholderTool name={currentTool.name} />
     }
