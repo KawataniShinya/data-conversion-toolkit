@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CATEGORIES } from './data/tools'
 import type { ToolCategory } from './data/tools'
 import Home from './components/Home'
@@ -15,6 +15,7 @@ import './App.css'
 function App() {
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'home'>('home')
   const [activeToolId, setActiveToolId] = useState<string | null>(null)
+  const contentAreaRef = useRef<HTMLDivElement | null>(null)
 
   const navigateHome = () => {
     setActiveCategory('home')
@@ -28,6 +29,10 @@ function App() {
 
   const currentCategory = activeCategory !== 'home' ? CATEGORIES.find(c => c.id === activeCategory) : null
   const currentTool = currentCategory?.tools.find(t => t.id === activeToolId)
+
+  useEffect(() => {
+    contentAreaRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [activeCategory, activeToolId])
 
   const renderIcon = (name: string) => {
     const IconComponent = (Icons as any)[name]
@@ -96,7 +101,7 @@ function App() {
             ))}
           </div>
         )}
-        <div className="content-area">
+        <div className="content-area" ref={contentAreaRef}>
           {renderTool()}
         </div>
       </main>
