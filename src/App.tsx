@@ -63,48 +63,55 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header" onClick={navigateHome}>
+    <div className="app-shell">
+      <header className="app-header">
+        <button type="button" className="app-header-link" onClick={navigateHome}>
           Data Conversion Toolkit
-        </div>
-        <div className="category-list">
-          {CATEGORIES.map((cat) => (
-            <div 
-              key={cat.id} 
-              className={`category-item ${activeCategory === cat.id ? 'active' : ''}`}
-              onClick={() => {
-                setActiveCategory(cat.id);
-                setActiveToolId(cat.tools[0].id);
-              }}
-            >
-              {renderIcon(cat.icon)}
-              <span>{cat.name}</span>
-            </div>
-          ))}
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="main-content">
-        {activeCategory !== 'home' && currentCategory && (
-          <div className="tool-tabs">
-            {currentCategory.tools.map((tool) => (
-              <div 
-                key={tool.id}
-                className={`tool-tab ${activeToolId === tool.id ? 'active' : ''}`}
-                onClick={() => setActiveToolId(tool.id)}
+        </button>
+      </header>
+      <div className="app-container">
+        {/* Sidebar */}
+        <aside className="sidebar">
+          <div className="category-list">
+            {CATEGORIES.map((cat) => (
+              <div
+                key={cat.id}
+                className={`category-item ${activeCategory === cat.id ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveCategory(cat.id);
+                  setActiveToolId(cat.tools[0].id);
+                }}
               >
-                {tool.name}
+                {renderIcon(cat.icon)}
+                <span>{cat.name}</span>
               </div>
             ))}
           </div>
-        )}
-        <div className="content-area" ref={contentAreaRef}>
-          {renderTool()}
-        </div>
-      </main>
+        </aside>
+
+        {/* Main Content */}
+        <main className="main-content">
+          {activeCategory !== 'home' && currentCategory && (
+            <div className="tool-tabs">
+              {currentCategory.tools.map((tool) => (
+                <div
+                  key={tool.id}
+                  className={`tool-tab ${activeToolId === tool.id ? 'active' : ''}`}
+                  onClick={() => setActiveToolId(tool.id)}
+                >
+                  {tool.name}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="content-area" ref={contentAreaRef}>
+            {renderTool()}
+          </div>
+        </main>
+      </div>
+      <footer className="app-footer">
+        Copyright © 2026 KawataniShinya
+      </footer>
     </div>
   )
 }

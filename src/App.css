@@ -14,9 +14,40 @@ body {
   color: var(--text-color);
 }
 
+.app-shell {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.app-header-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
 .app-container {
   display: flex;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Sidebar styles */
@@ -28,18 +59,10 @@ body {
   flex-direction: column;
 }
 
-.sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  font-weight: bold;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
 .category-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem;
 }
 
 .category-item {
@@ -104,10 +127,24 @@ body {
   padding: 2rem;
 }
 
+.app-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  padding: 0.875rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.95);
+  color: #64748b;
+  font-size: 0.875rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
 /* Common tool UI */
 .tool-container {
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .tool-title {
@@ -326,6 +363,16 @@ textarea {
 }
 
 @media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
   .grid-2 {
     grid-template-columns: 1fr;
   }
@@ -337,8 +384,9 @@ textarea {
 
 /* Home / Welcome styles */
 .home-container {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .home-section {
@@ -347,7 +395,7 @@ textarea {
 
 .tool-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
