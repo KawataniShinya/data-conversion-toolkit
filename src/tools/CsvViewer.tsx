@@ -10,9 +10,10 @@ type CsvDimensions = {
   columns: number
 }
 
-const SAMPLE_CSV = `jst_time,level,message,context
-2026-04-02 01:00:53.421 +09:00,INFO,"Batch started","{""command"":""reader-linkage""}"
-2026-04-14 12:34:56.789 +09:00,INFO,"Reader updated","{""target"":""readers"",""updated"":""{\\""asp_member_id\\"":55561}""}"`
+const CSV_PLACEHOLDER = `name,age,city
+Alice,30,Tokyo
+Bob,25,Osaka
+"Charlie, Jr.",41,"New York"`
 
 const parseCsv = (input: string): string[][] => {
   if (input === '') {
@@ -93,12 +94,12 @@ const normalizeRows = (rows: string[][], dimensions: CsvDimensions): string[][] 
   )
 
 const CsvViewer: React.FC = () => {
-  const [csvText, setCsvText] = useState(SAMPLE_CSV)
-  const [rows, setRows] = useState<string[][]>(() => parseCsv(SAMPLE_CSV))
-  const [selectedCell, setSelectedCell] = useState<CsvCellPosition>({ row: 1, column: 0 })
+  const [csvText, setCsvText] = useState('')
+  const [rows, setRows] = useState<string[][]>([['']])
+  const [selectedCell, setSelectedCell] = useState<CsvCellPosition>({ row: 0, column: 0 })
   const [hasHeader, setHasHeader] = useState(true)
   const [error, setError] = useState('')
-  const [dimensions, setDimensions] = useState<CsvDimensions>(() => getDimensions(parseCsv(SAMPLE_CSV)))
+  const [dimensions, setDimensions] = useState<CsvDimensions>({ rows: 1, columns: 1 })
 
   const normalizedRows = useMemo(() => {
     return normalizeRows(rows, dimensions)
@@ -221,7 +222,7 @@ const CsvViewer: React.FC = () => {
             value={csvText}
             onChange={(event) => handleCsvChange(event.target.value)}
             spellCheck={false}
-            placeholder="CSV を貼り付け..."
+            placeholder={CSV_PLACEHOLDER}
             className="csv-source"
           />
           {error && <div className="csv-error">Error: {error}</div>}
