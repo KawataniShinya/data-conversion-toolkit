@@ -1,16 +1,13 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
-type Mode = 'escape' | 'unescape'
-
-const MODE_LABELS: Record<Mode, string> = {
-  escape: 'エスケープ',
-  unescape: 'アンエスケープ',
-}
-
-const EXAMPLES: Record<Mode, string> = {
-  escape: '例: {"name":"John","age":0}',
-  unescape: '例: {"target":"readers","updated":"{\\"asp_member_id\\":55561}"}',
-}
+const ENCODED_PLACEHOLDER = '例: {"target":"users","updated":"{\\"name\\":\\"Alice\\",\\"age\\":30}"}'
+const DECODED_PLACEHOLDER = `例: {
+  "target": "users",
+  "updated": {
+    "name": "Alice",
+    "age": 30
+  }
+}`
 
 const tryParseNestedJson = (value: string): unknown => {
   const trimmed = value.trim()
@@ -52,51 +49,52 @@ const expandNestedJson = (value: unknown): unknown => {
   return value
 }
 
-const JsonEscapeConverter: React.FC = () => {
-  const [mode, setMode] = useState<Mode>('escape')
-  const [input, setInput] = useState('')
+const formatDecodedValue = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value, null, 2)
 
-  const { output, error } = useMemo(() => {
+const decodeJsonValue = (input: string): string => {
+  const trimmed = input.trim()
+  const parsed = expandNestedJson(JSON.parse(trimmed))
+  return formatDecodedValue(parsed)
+}
+
+const encodeJsonValue = (input: string): string => JSON.stringify(input).slice(1, -1)
+
+const JsonEscapeConverter: React.FC = () => {
+  const [encoded, setEncoded] = useState('')
+  const [decoded, setDecoded] = useState('')
+  const [error, setError] = useState('')
+
+  const updateFromEncoded = (input: string) => {
+    setEncoded(input)
+
     if (input === '') {
-      return { output: '', error: '' }
+      setDecoded('')
+      setError('')
+      return
     }
 
     try {
-      if (mode === 'escape') {
-        return {
-          output: JSON.stringify(input).slice(1, -1),
-          error: '',
-        }
-      }
-
-      const trimmed = input.trim()
-
-      try {
-        const parsed = expandNestedJson(JSON.parse(trimmed))
-
-        return {
-          output: typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2),
-          error: '',
-        }
-      } catch {
-        const normalized = trimmed.startsWith('"') && trimmed.endsWith('"')
-          ? trimmed
-          : `"${input}"`
-        const parsed = expandNestedJson(JSON.parse(normalized))
-
-        return {
-          output: typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2),
-          error: '',
-        }
-      }
+      setDecoded(decodeJsonValue(input))
+      setError('')
     } catch {
-      return { output: '', error: 'Error: 不正な JSON エスケープ文字列です' }
+      try {
+        const normalized = input.trim().startsWith('"') && input.trim().endsWith('"')
+          ? input.trim()
+          : `"${input}"`
+        setDecoded(formatDecodedValue(expandNestedJson(JSON.parse(normalized))))
+        setError('')
+      } catch {
+        setDecoded('')
+        setError('Error: 不正な JSON エスケープ文字列です')
+      }
     }
-  }, [input, mode])
+  }
 
-  const toggleMode = () => {
-    setInput(output)
-    setMode((current) => (current === 'escape' ? 'unescape' : 'escape'))
+  const updateFromDecoded = (input: string) => {
+    setDecoded(input)
+    setEncoded(input === '' ? '' : encodeJsonValue(input))
+    setError('')
   }
 
   return (
@@ -104,48 +102,30 @@ const JsonEscapeConverter: React.FC = () => {
       <h2 className="tool-title">エスケープ変換（JSON）</h2>
       <div className="tool-card">
         <p style={{ marginBottom: '1.5rem', color: '#64748b' }}>
-          JSON 文字列で使うエスケープ表現と通常テキストを相互に変換します。
-          `\n` や `\"`、Unicode エスケープに加えて、JSON オブジェクトや配列の確認にも使えます。
+          上側に JSON エスケープ済み文字列、下側にデコード後の文字列を表示します。
+          どちらを編集しても即座にもう片方へ反映されます。
         </p>
 
-        <div className="json-escape-toolbar">
-          <button className="primary-button" onClick={toggleMode}>
-            {mode === 'escape' ? 'Escape ➔ Unescape' : 'Unescape ➔ Escape'} に切替
-          </button>
-          <span className="mode-badge">
-            現在のモード: <strong>{MODE_LABELS[mode]}</strong>
-          </span>
+        <div className="form-group">
+          <label>エンコード文字列 (Escaped)</label>
+          <textarea
+            value={encoded}
+            onChange={(event) => updateFromEncoded(event.target.value)}
+            placeholder={ENCODED_PLACEHOLDER}
+            spellCheck={false}
+          />
         </div>
 
-        <div className="grid-2">
-          <div className="form-group">
-            <label>{mode === 'escape' ? '入力 (Text)' : '入力 (Escaped)'}</label>
-            <textarea
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder={EXAMPLES[mode]}
-              spellCheck={false}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>{mode === 'escape' ? '出力 (Escaped)' : '出力 (Text)'}</label>
-            <textarea
-              value={error || output}
-              readOnly
-              spellCheck={false}
-              style={{
-                backgroundColor: error ? '#fef2f2' : '#f8fafc',
-                color: error ? '#b91c1c' : undefined,
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="tool-note">
-          アンエスケープ時は `\"hello\"` のような JSON 文字列本体、`"hello"` のような引用符付き JSON 文字列、
-          あるいは JSON オブジェクトや配列そのものも扱えます。ネストした JSON 文字列も再帰的に展開します。
+        <div className="form-group">
+          <label>デコード文字列 (Decoded)</label>
+          <textarea
+            value={error ? '' : decoded}
+            onChange={(event) => updateFromDecoded(event.target.value)}
+            placeholder={DECODED_PLACEHOLDER}
+            spellCheck={false}
+            style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' }}
+          />
+          {error && <div className="csv-error">{error}</div>}
         </div>
       </div>
     </div>

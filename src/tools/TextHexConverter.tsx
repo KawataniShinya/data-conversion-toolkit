@@ -89,7 +89,7 @@ const TextHexConverter: React.FC = () => {
           <textarea
             value={text}
             onChange={(e) => updateFromText(e.target.value, encoding)}
-            placeholder="テキストを入力..."
+            placeholder="例: Hello World! / こんにちは"
             spellCheck={false}
           />
         </div>
@@ -100,7 +100,7 @@ const TextHexConverter: React.FC = () => {
             value={hex}
             onChange={(e) => updateFromHex(e.target.value, encoding)}
             style={{ fontFamily: 'monospace' }}
-            placeholder="E3 81 82..."
+            placeholder="例: 48 65 6C 6C 6F 20 57 6F 72 6C 64 21"
             spellCheck={false}
           />
         </div>
