@@ -15,16 +15,19 @@ import './App.css'
 function App() {
   const [activeCategory, setActiveCategory] = useState<ToolCategory | 'home'>('home')
   const [activeToolId, setActiveToolId] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const contentAreaRef = useRef<HTMLDivElement | null>(null)
 
   const navigateHome = () => {
     setActiveCategory('home')
     setActiveToolId(null)
+    setIsMobileMenuOpen(false)
   }
 
   const handleSelectTool = (categoryId: ToolCategory, toolId: string) => {
     setActiveCategory(categoryId)
     setActiveToolId(toolId)
+    setIsMobileMenuOpen(false)
   }
 
   const currentCategory = activeCategory !== 'home' ? CATEGORIES.find(c => c.id === activeCategory) : null
@@ -68,25 +71,32 @@ function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
+        <button
+          type="button"
+          className="menu-toggle"
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? <Icons.X size={20} /> : <Icons.Menu size={20} />}
+        </button>
         <button type="button" className="app-header-link" onClick={navigateHome}>
           Data Conversion Toolkit
         </button>
       </header>
       <div className="app-container">
+        {isMobileMenuOpen && <button type="button" className="sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close navigation menu" />}
         {/* Sidebar */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
           <div className="category-list">
             {CATEGORIES.map((cat) => (
               <div
                 key={cat.id}
                 className={`category-item ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory(cat.id);
-                  setActiveToolId(cat.tools[0].id);
-                }}
+                onClick={() => handleSelectTool(cat.id, cat.tools[0].id)}
               >
                 {renderIcon(cat.icon)}
-                <span>{cat.name}</span>
+                <span className="category-label">{cat.name}</span>
               </div>
             ))}
           </div>
