@@ -1,70 +1,65 @@
 import React, { useState } from 'react'
 
-const UrlEncoder: React.FC = () => {
-  const [input, setInput] = useState('')
-  const [output, setOutput] = useState('')
-  const [mode, setMode] = useState<'encode' | 'decode'>('encode')
+const ENCODED_PLACEHOLDER = '例: Hello%20World%21%20q%3D%E6%A4%9C%E7%B4%A2'
+const DECODED_PLACEHOLDER = '例: Hello World! q=検索'
 
-  const handleConvert = (val: string, currentMode: 'encode' | 'decode') => {
-    setInput(val)
+const UrlEncoder: React.FC = () => {
+  const [encoded, setEncoded] = useState('')
+  const [decoded, setDecoded] = useState('')
+  const [error, setError] = useState('')
+
+  const updateFromEncoded = (input: string) => {
+    setEncoded(input)
+
+    if (input === '') {
+      setDecoded('')
+      setError('')
+      return
+    }
+
     try {
-      if (currentMode === 'encode') {
-        setOutput(encodeURIComponent(val))
-      } else {
-        setOutput(decodeURIComponent(val))
-      }
-    } catch (e) {
-      setOutput('Error: Invalid input for decoding')
+      setDecoded(decodeURIComponent(input))
+      setError('')
+    } catch {
+      setDecoded('')
+      setError('Error: URL デコードできない文字列です')
     }
   }
 
-  const toggleMode = () => {
-    const newMode = mode === 'encode' ? 'decode' : 'encode'
-    setMode(newMode)
-    // Swap input and output
-    const newInput = output.startsWith('Error:') ? '' : output
-    handleConvert(newInput, newMode)
+  const updateFromDecoded = (input: string) => {
+    setDecoded(input)
+    setEncoded(input === '' ? '' : encodeURIComponent(input))
+    setError('')
   }
 
   return (
     <div className="tool-container">
       <h2 className="tool-title">URLエンコード</h2>
       <div className="tool-card">
-        <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <button 
-            onClick={toggleMode}
-            style={{ 
-              padding: '0.5rem 1rem', 
-              backgroundColor: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              cursor: 'pointer'
-            }}
-          >
-            {mode === 'encode' ? 'Encode ➔ Decode' : 'Decode ➔ Encode'} に切替
-          </button>
-          <span style={{ color: '#64748b' }}>
-            現在のモード: <strong>{mode === 'encode' ? 'エンコード' : 'デコード'}</strong>
-          </span>
-        </div>
+        <p style={{ marginBottom: '1.5rem', color: '#64748b' }}>
+          上側に URL エンコード済み文字列、下側にデコード後の文字列を表示します。
+          どちらを編集しても即座にもう片方へ反映されます。
+        </p>
 
         <div className="form-group">
-          <label>{mode === 'encode' ? '入力 (Text)' : '入力 (Encoded)'}</label>
+          <label>エンコード文字列 (Encoded)</label>
           <textarea
-            value={input}
-            onChange={(e) => handleConvert(e.target.value, mode)}
-            placeholder={mode === 'encode' ? 'ここにテキストを入力...' : 'ここにエンコード済み文字列を入力...'}
+            value={encoded}
+            onChange={(event) => updateFromEncoded(event.target.value)}
+            placeholder={ENCODED_PLACEHOLDER}
+            spellCheck={false}
           />
         </div>
 
         <div className="form-group">
-          <label>{mode === 'encode' ? '出力 (Encoded)' : '出力 (Text)'}</label>
+          <label>デコード文字列 (Decoded)</label>
           <textarea
-            value={output}
-            readOnly
-            style={{ backgroundColor: '#f8fafc' }}
+            value={error ? '' : decoded}
+            onChange={(event) => updateFromDecoded(event.target.value)}
+            placeholder={DECODED_PLACEHOLDER}
+            spellCheck={false}
           />
+          {error && <div className="csv-error">Error: URL デコードできない文字列です</div>}
         </div>
       </div>
     </div>
