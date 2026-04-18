@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { CATEGORIES } from './data/tools'
 import type { ToolCategory } from './data/tools'
 import Home from './components/Home'
@@ -13,32 +14,36 @@ import * as Icons from 'lucide-react'
 import './App.css'
 
 function App() {
-  const [activeCategory, setActiveCategory] = useState<ToolCategory | 'home'>('home')
-  const [activeToolId, setActiveToolId] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const contentAreaRef = useRef<HTMLDivElement | null>(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const pathSegments = location.pathname.split('/').filter(Boolean)
+  const categoryId = (pathSegments[0] as ToolCategory | undefined) ?? null
+  const toolId = pathSegments[1] ?? null
+  const isHome = pathSegments.length === 0
 
   const navigateHome = () => {
-    setActiveCategory('home')
-    setActiveToolId(null)
+    navigate('/')
     setIsMobileMenuOpen(false)
   }
 
   const handleSelectTool = (categoryId: ToolCategory, toolId: string) => {
-    setActiveCategory(categoryId)
-    setActiveToolId(toolId)
+    navigate(`/${categoryId}/${toolId}`)
     setIsMobileMenuOpen(false)
   }
 
-  const currentCategory = activeCategory !== 'home' ? CATEGORIES.find(c => c.id === activeCategory) : null
-  const currentTool = currentCategory?.tools.find(t => t.id === activeToolId)
+  const currentCategory = categoryId ? CATEGORIES.find(c => c.id === categoryId) ?? null : null
+  const currentTool = currentCategory?.tools.find(t => t.id === toolId) ?? null
 
   useEffect(() => {
     contentAreaRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
     document.documentElement.scrollTop = 0
     document.body.scrollTop = 0
-  }, [activeCategory, activeToolId])
+    setIsMobileMenuOpen(false)
+  }, [location.pathname])
 
   const renderIcon = (name: string) => {
     const IconComponent = (Icons as any)[name]
@@ -46,8 +51,12 @@ function App() {
   }
 
   const renderTool = () => {
-    if (activeCategory === 'home' || !currentTool) {
+    if (isHome) {
       return <Home onSelectTool={handleSelectTool} />
+    }
+
+    if (!currentCategory || !currentTool) {
+      return <Navigate to="/" replace />
     }
 
     switch (currentTool.id) {
@@ -92,7 +101,7 @@ function App() {
             {CATEGORIES.map((cat) => (
               <div
                 key={cat.id}
-                className={`category-item ${activeCategory === cat.id ? 'active' : ''}`}
+                className={`category-item ${currentCategory?.id === cat.id ? 'active' : ''}`}
                 onClick={() => handleSelectTool(cat.id, cat.tools[0].id)}
               >
                 {renderIcon(cat.icon)}
@@ -104,13 +113,13 @@ function App() {
 
         {/* Main Content */}
         <main className="main-content">
-          {activeCategory !== 'home' && currentCategory && (
+          {!isHome && currentCategory && (
             <div className="tool-tabs">
               {currentCategory.tools.map((tool) => (
                 <div
                   key={tool.id}
-                  className={`tool-tab ${activeToolId === tool.id ? 'active' : ''}`}
-                  onClick={() => setActiveToolId(tool.id)}
+                  className={`tool-tab ${toolId === tool.id ? 'active' : ''}`}
+                  onClick={() => handleSelectTool(currentCategory.id, tool.id)}
                 >
                   {tool.name}
                 </div>
